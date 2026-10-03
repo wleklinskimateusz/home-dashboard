@@ -54,7 +54,7 @@ export async function loginAction(
 
     // Success
     await createSession(user.id);
-    redirect("/dashboard");
+    redirect("/");
 }
 
 export async function setupPinAction(
@@ -83,7 +83,7 @@ export async function setupPinAction(
 
     // Auto-login after setting PIN
     await createSession(userId);
-    redirect("/dashboard");
+    redirect("/");
 }
 
 export async function logout(): Promise<void> {

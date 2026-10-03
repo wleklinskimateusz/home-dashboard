@@ -92,7 +92,7 @@ export const MyKanbanBoard = ({ columns, tasks }: {
             onCardMove={(move) => {
                 setDataSource(getNewValue(dataSource, move))
 
-                fetch("/api", { method: "POST", body: JSON.stringify({ oldValue: dataSource, move }) }).then(response => {
+                fetch("/kanban/api", { method: "POST", body: JSON.stringify({ oldValue: dataSource, move }) }).then(response => {
                     if (!response.ok) { throw Error("LOL") }
                 })
 
