@@ -1,4 +1,4 @@
-import { MyKanbanBoard } from "@/app/kanban/components/kanban";
+import { MyKanbanBoard } from "@/app/(dashboard)/kanban/_components/kanban";
 
 
 export default async function Home() {
@@ -14,6 +14,7 @@ export default async function Home() {
       position: number;
     }[]
   } = await response.json()
+
 
   return <MyKanbanBoard columns={columns} tasks={tasks} />
 }

@@ -1,6 +1,6 @@
 // app/login/page.tsx
 import { getDb } from '@/lib/db';
-import { LoginForm } from '@/components/LoginForm';
+import { LoginForm } from './_components/LoginForm';
 import { User } from '@/lib/db';
 
 export default async function LoginPage() {
