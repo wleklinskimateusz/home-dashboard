@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar"
 
 import { Plus } from "lucide-react"
+import Link from "next/link"
 
 export function AppSidebar() {
     return (
@@ -30,8 +31,7 @@ export function AppSidebar() {
                     <SidebarGroupContent >
                         <SidebarMenu>
                             <SidebarMenuItem >
-                                <SidebarMenuButton render={<a href="/kanban/home" />}>
-                                    {/* icon */}
+                                <SidebarMenuButton render={<Link href="/kanban/default" />}>
                                     <span>Home Board</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
