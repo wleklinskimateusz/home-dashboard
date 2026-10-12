@@ -33,6 +33,7 @@ export function getDb(): Database.Database {
     if (!db) {
         db = new Database(process.env.DATABASE_PATH || "./kanban.db");
         db.pragma("journal_mode = WAL");
+        db.pragma("foreign_keys = ON");
     }
     return db;
 }

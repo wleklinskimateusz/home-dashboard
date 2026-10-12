@@ -31,7 +31,7 @@ const getNewValue = (oldValue: BoardData, move: DropCardParams) => {
 
 const buildBoardData = (columns: {
     id: string;
-    label: string;
+    name: string;
 }[], tasks: {
     id: string;
     title: string;
@@ -42,7 +42,7 @@ const buildBoardData = (columns: {
         root: { id: "root", title: "Root", children: columns.map(({ id }) => id), totalChildrenCount: columns.length, parentId: null },
         ...Object.fromEntries(columns.map(column => {
             const colTasks = tasks.filter(task => task.columnId === column.id);
-            return { id: column.id, title: column.label, children: colTasks.map(task => task.id), totalChildrenCount: colTasks.length, parent: "root" }
+            return { id: column.id, title: column.name, children: colTasks.map(task => task.id), totalChildrenCount: colTasks.length, parent: "root" }
         }).map(obj => [obj.id, obj])),
         ...Object.fromEntries(tasks.map(task => {
             return { id: task.id, title: task.title, children: [], totalChildrenCount: 0, type: "card", parent: task.columnId }
@@ -50,11 +50,12 @@ const buildBoardData = (columns: {
     }
 }
 
-export const MyKanbanBoard = ({ columns, tasks }: {
+export const MyKanbanBoard = ({ boardName, columns, tasks }: {
+    boardName: string;
 
     columns: {
         id: string;
-        label: string;
+        name: string;
     }[];
     tasks: {
         id: string;
@@ -92,7 +93,11 @@ export const MyKanbanBoard = ({ columns, tasks }: {
             onCardMove={(move) => {
                 setDataSource(getNewValue(dataSource, move))
 
-                fetch("/kanban/api", { method: "POST", body: JSON.stringify({ oldValue: dataSource, move }) }).then(response => {
+                fetch(`/kanban/${encodeURIComponent(boardName)}/api`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ move }),
+                }).then(response => {
                     if (!response.ok) { throw Error("LOL") }
                 })
 

@@ -24,5 +24,28 @@ for (const user of users) {
   }
 }
 
+// Seed a default board and its columns – only insert missing rows
+db.prepare(
+  `
+  INSERT OR IGNORE INTO boards (name)
+  VALUES (?)
+`,
+).run("default");
+
+const board = db.prepare("SELECT id FROM boards WHERE name = ?").get("default");
+const columns = [
+  { name: "To Do", position: 0 },
+  { name: "Doing", position: 1 },
+  { name: "Done", position: 2 },
+];
+const insertColumnStmt = db.prepare(`
+  INSERT OR IGNORE INTO columns (name, position, board_id)
+  VALUES (?, ?, ?)
+`);
+
+for (const column of columns) {
+  insertColumnStmt.run(column.name, column.position, board.id);
+}
+
 db.close();
 console.log("✅ Seed complete.");

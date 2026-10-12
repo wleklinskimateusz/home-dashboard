@@ -1,38 +1,56 @@
-const columns = [
-    { id: "to-do", label: "To Do" },
-    { id: "doing", label: "Doing" },
-    { id: "done", label: "Done" },
-];
+import { getKanbanServices } from "@/services/kanban-service-provider";
 
-const tasks = [
-    { id: "task-1", title: "Design Homepage", columnId: "to-do" },
-    { id: "task-2", title: "Setup Database", columnId: "to-do" },
-    { id: "task-3", title: "Build Auth Flow", columnId: "doing" },
-    { id: "task-4", title: "Deploy to Production", columnId: "done" },
-];
+type RouteContext = { params: Promise<{ boardName: string }> };
 
-export function GET() {
-    return Response.json({ columns, tasks });
+export async function GET(_request: Request, { params }: RouteContext) {
+    const { boardName } = await params;
+    const board = getKanbanServices().boards.getBoard(boardName);
+
+    if (!board) {
+        return Response.json({ error: "Board not found" }, { status: 404 });
+    }
+
+    return Response.json({
+        board: board.board,
+        columns: board.columns.map(({ id, name }) => ({ id, label: name })),
+        tasks: board.tasks.map(({ id, title, columnId, position }) => ({
+            id,
+            title,
+            columnId,
+            position,
+        })),
+    });
 }
 
-type DropCardParams = {
-    cardId: string;
-    fromColumnId: string;
-    toColumnId: string;
-    taskAbove: string | null;
-    taskBelow: string | null;
-    position: number;
-};
+export async function POST(request: Request, { params }: RouteContext) {
+    const { boardName } = await params;
+    const body: unknown = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || !("move" in body)) {
+        return Response.json({ error: "Invalid request" }, { status: 400 });
+    }
 
-export async function POST(req: Request) {
-    const { move } = (await req.json()) as {
-        move: DropCardParams;
-    };
+    const move = body.move;
+    if (
+        !move || typeof move !== "object" ||
+        !("cardId" in move) || typeof move.cardId !== "string" ||
+        !("toColumnId" in move) || typeof move.toColumnId !== "string" ||
+        !("position" in move) || typeof move.position !== "number"
+    ) {
+        return Response.json({ error: "Invalid move" }, { status: 400 });
+    }
 
-    const task = tasks.find(({ id }) => move.cardId === id);
-    if (!task) return Response.json({ error: "Not Found" }, { status: 404 });
+    try {
+        getKanbanServices().tasks.moveTask(boardName, {
+            taskId: move.cardId,
+            columnId: move.toColumnId,
+            position: move.position,
+        });
+    } catch (error) {
+        if (error instanceof Error && error.name === "NotFoundError") {
+            return Response.json({ error: error.message }, { status: 404 });
+        }
+        throw error;
+    }
 
-    task.columnId = move.toColumnId;
-
-    return Response.json({ success: true }, { status: 200 });
+    return Response.json({ success: true });
 }
